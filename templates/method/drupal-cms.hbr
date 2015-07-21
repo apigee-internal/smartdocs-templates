@@ -704,46 +704,132 @@
     };
 
     function examplifySchema (obj, originalObj) {
-        for (var key in obj) {
-            if (typeof obj[key] === "object") {
-                examplifySchema(obj[key], (originalObj || obj));
-            }
-            else {
-                if (key === "$ref") {
-                    if (typeof obj[key] === "string" && obj[key].indexOf("#/definitions") != -1) {
-                        var objRef = obj[key].slice(14);
-                        for (var oKey in originalObj[objRef]) {
-                            if(oKey != 'required'){
-                                obj[oKey] = originalObj[objRef][oKey];
+            for (var key in obj) {
+                if (typeof obj[key] === "object") {
+                    if(obj[key]["type"]){
+                        if (obj[key]["type"] === "integer") {
+                            if(obj[key]["example"]) {
+                                obj[key] = obj[key]["example"]
                             }
-                            if(oKey === 'properties'){
-                                for(var prop in originalObj[objRef]['properties']){
-                                    if(Object.keys(originalObj[objRef]['properties'][prop]).indexOf('type') != -1) {
-                                        if(originalObj[objRef]['properties'][prop]['type'] === "integer"){
-                                            obj[oKey][prop] = 0;
+                            else {
+                                obj[key] = 0;
+                            }
+
+                        }
+                        if (obj[key]["type"] === "number") {
+                            if(obj[key]["example"]) {
+                                obj[key] = obj[key]["example"]
+                            }
+                            else {
+                                obj[key] = 0.0;
+                            }
+                        }
+                        if (obj[key]["type"] === "boolean") {
+                            if(obj[key]["example"]) {
+                                obj[key] = obj[key]["example"]
+                            }
+                            else {
+                                obj[key] = false;
+                            }
+                        }
+                        if (obj[key]["type"] === "string") {
+                            if(obj[key]["example"]) {
+                                obj[key] = obj[key]["example"]
+                            }
+                            else {
+                                obj[key] = "";
+                            }
+                        }
+                        if (obj[key]["type"] === "array") {
+                            if (obj[key]["items"]["type"] === "integer") {
+                                obj[key] = [ 0 ];
+                            }
+                            if (obj[key]["items"]["type"] === "number") {
+                                obj[key] = [ 0.0 ];
+                            }
+                            if (obj[key]["items"]["type"] === "boolean") {
+                                obj[key] = [ false ];
+                            }
+                            if (obj[key]["items"]["type"] === "string") {
+                                obj[key] = [ "" ];
+                            }
+                            if (obj[key]["items"] && obj[key]["items"]["$ref"]) {
+                                if (typeof obj[key]["items"]["$ref"] === "string" && obj[key]["items"]["$ref"].indexOf("#/definitions") != -1) {
+                                    var objRef = obj[key]["items"]["$ref"].slice(14);
+                                    var exObj = {};
+                                    for (var oKey in originalObj[objRef]) {
+                                        if(oKey != 'required'){
+                                            exObj[oKey] = originalObj[objRef][oKey];
                                         }
-                                        if(originalObj[objRef]['properties'][prop]['type'] === "boolean"){
-                                            obj[oKey][prop] = false;
+                                        if(oKey === 'properties'){
+                                            for(var prop in originalObj[objRef]['properties']){
+                                                if(Object.keys(originalObj[objRef]['properties'][prop]).indexOf('type') != -1) {
+                                                    if(originalObj[objRef]['properties'][prop]['type'] === "integer"){
+                                                        exObj[oKey][prop] = 0;
+                                                    }
+                                                    if(originalObj[objRef]['properties'][prop]['type'] === "boolean"){
+                                                        exObj[oKey][prop] = false;
+                                                    }
+                                                    if(originalObj[objRef]['properties'][prop]['type'] === "double"){
+                                                        exObj[oKey][prop] = 0.0;
+                                                    }
+                                                    if(originalObj[objRef]['properties'][prop]['type'] === "number"){
+                                                        exObj[oKey][prop] = 0.0;
+                                                    }
+                                                    if(originalObj[objRef]['properties'][prop]['type'] === "string"){
+                                                        exObj[oKey][prop] = "";
+                                                    }
+                                                }
+                                            }
                                         }
-                                        if(originalObj[objRef]['properties'][prop]['type'] === "double"){
-                                            obj[oKey][prop] = 0.0;
-                                        }
-                                        if(originalObj[objRef]['properties'][prop]['type'] === "number"){
-                                            obj[oKey][prop] = 0.0;
-                                        }
-                                        if(originalObj[objRef]['properties'][prop]['type'] === "string"){
-                                            obj[oKey][prop] = "";
+                                    }
+                                    obj[key] = [ exObj ];
+                                    //delete obj[key];
+                                    delete obj["description"];
+                                }
+                            }
+                        }
+                    }
+                    else {
+                        examplifySchema(obj[key], (originalObj || obj));
+                    }
+                }
+                else {
+                    if (key === "$ref") {
+                        if (typeof obj[key] === "string" && obj[key].indexOf("#/definitions") != -1) {
+                            var objRef = obj[key].slice(14);
+                            for (var oKey in originalObj[objRef]) {
+                                if(oKey != 'required'){
+                                    obj[oKey] = originalObj[objRef][oKey];
+                                }
+                                if(oKey === 'properties'){
+                                    for(var prop in originalObj[objRef]['properties']){
+                                        if(Object.keys(originalObj[objRef]['properties'][prop]).indexOf('type') != -1) {
+                                            if(originalObj[objRef]['properties'][prop]['type'] === "integer"){
+                                                obj[oKey][prop] = 0;
+                                            }
+                                            if(originalObj[objRef]['properties'][prop]['type'] === "boolean"){
+                                                obj[oKey][prop] = false;
+                                            }
+                                            if(originalObj[objRef]['properties'][prop]['type'] === "double"){
+                                                obj[oKey][prop] = 0.0;
+                                            }
+                                            if(originalObj[objRef]['properties'][prop]['type'] === "number"){
+                                                obj[oKey][prop] = 0.0;
+                                            }
+                                            if(originalObj[objRef]['properties'][prop]['type'] === "string"){
+                                                obj[oKey][prop] = "";
+                                            }
                                         }
                                     }
                                 }
                             }
+                            delete obj[key];
+                            delete obj["description"];
                         }
-                        delete obj[key];
-                        delete obj["description"];
                     }
                 }
             }
-        }
-    };
+        };
 </script>
 </div>
