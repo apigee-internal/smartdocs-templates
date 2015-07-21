@@ -784,7 +784,6 @@
                                         }
                                     }
                                     obj[key] = [ exObj ];
-                                    //delete obj[key];
                                     delete obj["description"];
                                 }
                             }
