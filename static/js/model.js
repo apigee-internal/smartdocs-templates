@@ -467,6 +467,13 @@ Apigee.APIModel.Methods = function() {
    * This method invokes the necessary details for the operation page.
    */
   this.init = function() {
+    // Convert the auth type value as user friendly text.
+    var authTypeElement = jQuery("[data-role='auth-type']");
+    authType = jQuery.trim(authTypeElement.text());
+    if (authType.split(",").length > 1) {
+        authType = authType.substr(0,authType.length-1); // Remove the last extra comma symbol.
+    }
+    self.updateAuthContainer();
     //Fix for extraneous space in the resource URL.
     var resourceURLString = "";
     jQuery("[data-role='method_url_container'] span").each(function() {
