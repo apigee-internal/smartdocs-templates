@@ -659,44 +659,40 @@ Helper variables:
         }
     }
 
-    var newAuth = "";
-    jQuery("[data-role='auth-type']").text(newAuth);
+    var newAuth = [];
     for (var i in security){
         for (var keys in security[i]) {
             if(security[i][keys].type) {
-                if (security[i][keys].type === "OAUTH2") {
-                    newAuth = "OAuth 2.0";
-                    secName = keys;
-                    jQuery("[data-role='auth-type']").append(newAuth + ", ");
-                }
-                if (security[i][keys].type === "APIKEY") {
-                    newAuth = "API Key";
-                    secName = keys;
-                    jQuery("[data-role='auth-type']").append(newAuth + ", ");
-                    if(security[i][keys].templateauths) {
-                        for(var key in security[i][keys].templateauths) {
-                            Apigee.APIModel.apiKey = security[i][keys].templateauths[key];
-                            Apigee.APIModel.location = security[i][keys].location.toLowerCase();
-                            Apigee.APIModel.templateAuthName = key.toLowerCase();
+                switch (security[i][keys].type) {
+                    case 'OAUTH2':
+                        newAuth.push('OAuth 2.0');
+                        secName = keys;
+                        break;
+                    case 'BASIC':
+                        newAuth.push('HTTP Basic');
+                        break;
+                    case 'APIKEY':
+                        newAuth.push('API Key');
+                        if(security[i][keys].templateauths) {
+                            for(var key in security[i][keys].templateauths) {
+                                Apigee.APIModel.apiKey = security[i][keys].templateauths[key];
+                                Apigee.APIModel.location = security[i][keys].location.toLowerCase();
+                                Apigee.APIModel.templateAuthName = key.toLowerCase();
+                            }
                         }
-                    }
-                }
-                if (security[i][keys].type === "BASIC") {
-                    newAuth = "HTTP Basic";
-                    secName = keys;
-                    jQuery("[data-role='auth-type']").append(newAuth + ", ");
+                        break;
                 }
             }
             else if (keys === "api_key") {
-                newAuth = "API Key";
-                jQuery("[data-role='auth-type']").append(newAuth + ", ");
+                newAuth.push("API Key");
             }
         }
     }
-    if (jQuery("[data-role='auth-type']").text() === "") {
-        jQuery("[data-role='auth-type']").append("None");
+    if (newAuth.length == 0) {
+        newAuth.push('None');
     }
-    var payload = jQuery(".request_payload")
+    jQuery("[data-role='auth-type']").text(newAuth.join(', '));
+    var payload = jQuery(".request_payload");
     if (Apigee.APIModel.verb != "post" && Apigee.APIModel.verb != "put" && Apigee.APIModel.verb != "patch") {
         // Remove request payload for verbs that carry no payload.
         payload.remove();
@@ -738,6 +734,6 @@ Helper variables:
                 }
             }
         }
-    };
+    }
 </script>
 </div>
